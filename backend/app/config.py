@@ -24,9 +24,10 @@ class Settings(BaseSettings):
     SUPABASE_SERVICE_KEY: str = ""
     SUPABASE_ANON_KEY: str = ""
 
-    ANTHROPIC_API_KEY: str = ""
-    ANTHROPIC_MODEL: str = "claude-sonnet-4-6"
-    ANTHROPIC_MAX_TOKENS: int = 1500
+    GROQ_API_KEY: str = ""
+    GROQ_MODEL: str = "llama-3.3-70b-versatile"
+    GROQ_VISION_MODEL: str = "llama-3.2-90b-vision-preview"
+    GROQ_MAX_TOKENS: int = 1500
 
     CREDITS_FORENSIC_ANALYSIS: int = 3
     CREDITS_FUMBLE_ANALYSIS: int = 1

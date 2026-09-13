@@ -3,29 +3,31 @@ import json
 import re
 from typing import Any
 
-import anthropic
+import openai
 
 from app.config import settings
 
-_client: anthropic.AsyncAnthropic | None = None
+_client: openai.AsyncOpenAI | None = None
 
 
-def get_client() -> anthropic.AsyncAnthropic:
+def get_client() -> openai.AsyncOpenAI:
     global _client
     if _client is None:
-        _client = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
+        _client = openai.AsyncOpenAI(
+            api_key=settings.GROQ_API_KEY,
+            base_url="https://api.groq.com/openai/v1",
+        )
     return _client
 
 
-async def _call(system: str, messages: list[dict], max_tokens: int = None) -> str:
+async def _call(system: str, messages: list[dict], max_tokens: int = None, model: str = None) -> str:
     client = get_client()
-    response = await client.messages.create(
-        model=settings.ANTHROPIC_MODEL,
-        max_tokens=max_tokens or settings.ANTHROPIC_MAX_TOKENS,
-        system=system,
-        messages=messages,
+    response = await client.chat.completions.create(
+        model=model or settings.GROQ_MODEL,
+        max_tokens=max_tokens or settings.GROQ_MAX_TOKENS,
+        messages=[{"role": "system", "content": system}, *messages],
     )
-    return response.content[0].text
+    return response.choices[0].message.content
 
 
 def _parse_json(text: str) -> dict:
@@ -90,27 +92,25 @@ Rules:
 
 async def analyze_receipts(text_content: str, image_base64: str | None = None) -> dict:
     user_content: list[Any] = []
+    model = None
 
     if image_base64:
-        user_content.append({
-            "type": "image",
-            "source": {
-                "type": "base64",
-                "media_type": "image/jpeg",
-                "data": image_base64,
-            },
-        })
         user_content.append({
             "type": "text",
             "text": "Perform a full forensic analysis of this conversation screenshot.",
         })
+        user_content.append({
+            "type": "image_url",
+            "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"},
+        })
+        model = settings.GROQ_VISION_MODEL
     else:
         user_content.append({
             "type": "text",
             "text": f"Perform a full forensic analysis of this conversation:\n\n{text_content}",
         })
 
-    raw = await _call(FORENSIC_SYSTEM, [{"role": "user", "content": user_content}])
+    raw = await _call(FORENSIC_SYSTEM, [{"role": "user", "content": user_content}], model=model)
     return _parse_json(raw)
 
 

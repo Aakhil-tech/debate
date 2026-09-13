@@ -10,7 +10,7 @@ FastAPI backend for the **Debate & Win** (Receipts AI Text Strategist) app.
 | Auth | Supabase Auth + custom JWT |
 | DB | Supabase (PostgreSQL) |
 | Storage | Supabase Storage (screenshots) |
-| AI | Anthropic `claude-sonnet-4-6` |
+| AI | Groq `llama-3.3-70b-versatile` |
 | Rate Limiting | In-process sliding window (swap Redis/slowapi for prod) |
 
 ## Endpoints
@@ -48,7 +48,7 @@ Full interactive docs at `http://localhost:8000/docs`
 
 - Python 3.12+
 - A [Supabase](https://supabase.com) project (free tier works)
-- An [Anthropic](https://console.anthropic.com) API key
+- A [Groq](https://console.groq.com) API key
 
 ### 2. Clone & install
 
@@ -64,7 +64,7 @@ pip install -r requirements.txt
 
 ```bash
 cp .env.example .env
-# Edit .env — fill in SUPABASE_URL, SUPABASE_SERVICE_KEY, ANTHROPIC_API_KEY, SECRET_KEY
+# Edit .env — fill in SUPABASE_URL, SUPABASE_SERVICE_KEY, GROQ_API_KEY, SECRET_KEY
 ```
 
 Generate a SECRET_KEY:

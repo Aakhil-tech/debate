@@ -18,11 +18,13 @@ services:
       - key: CORS_ORIGINS
         value: "[]"
 
-      - key: ANTHROPIC_API_KEY
+      - key: GROQ_API_KEY
         sync: false
-      - key: ANTHROPIC_MODEL
-        value: claude-sonnet-4-6
-      - key: ANTHROPIC_MAX_TOKENS
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile
+      - key: GROQ_VISION_MODEL
+        value: llama-3.2-90b-vision-preview
+      - key: GROQ_MAX_TOKENS
         value: "1500"
 
       - key: DB_BACKEND
