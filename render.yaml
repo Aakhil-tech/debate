@@ -26,6 +26,8 @@ services:
         value: qwen/qwen3.8-27b
       - key: GROQ_MAX_TOKENS
         value: "1500"
+      - key: GROQ_VISION_MAX_TOKENS
+        value: "900"
 
       - key: DB_BACKEND
         value: supabase
@@ -44,6 +46,8 @@ services:
         value: "1"
       - key: CREDITS_NEW_USER_BONUS
         value: "20"
+      - key: CREDITS_UNLIMITED
+        value: "true"
 
       - key: RATE_LIMIT_PER_MINUTE
         value: "30"

@@ -1,10 +1,13 @@
 
 from fastapi import HTTPException
 
+from app.config import settings
 from app.db import repo
 
 
 async def gate(user_id: str, cost: int) -> int:
+    if settings.CREDITS_UNLIMITED:
+        return await get_balance(user_id)
     try:
         return await repo().deduct_credits(user_id, cost)
     except ValueError as e:

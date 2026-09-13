@@ -93,6 +93,7 @@ Rules:
 async def analyze_receipts(text_content: str, image_base64: str | None = None) -> dict:
     user_content: list[Any] = []
     model = None
+    max_tokens = None
 
     if image_base64:
         user_content.append({
@@ -104,13 +105,16 @@ async def analyze_receipts(text_content: str, image_base64: str | None = None) -
             "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"},
         })
         model = settings.GROQ_VISION_MODEL
+        max_tokens = settings.GROQ_VISION_MAX_TOKENS
     else:
         user_content.append({
             "type": "text",
             "text": f"Perform a full forensic analysis of this conversation:\n\n{text_content}",
         })
 
-    raw = await _call(FORENSIC_SYSTEM, [{"role": "user", "content": user_content}], model=model)
+    raw = await _call(
+        FORENSIC_SYSTEM, [{"role": "user", "content": user_content}], max_tokens=max_tokens, model=model
+    )
     return _parse_json(raw)
 
 
