@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from typing import Any, Optional
 
 from supabase import Client, create_client
-from supabase import AuthApiError
+from gotrue.errors import AuthApiError
 
 from app.config import settings
 from app.db.base import Repository
