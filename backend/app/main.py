@@ -1,6 +1,10 @@
 
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from contextlib import asynccontextmanager
 
 from app.routers import auth, credits, receipts, fumble, sparring, war_room
@@ -45,11 +49,19 @@ app.include_router(sparring.router,  prefix="/sparring",  tags=["Sparring"])
 app.include_router(war_room.router,  prefix="/war-room",  tags=["War Room"])
 
 
-@app.get("/", tags=["Health"])
-async def root():
-    return {"status": "operational", "product": "Debate & Win", "version": "3.0.0"}
-
-
 @app.get("/health", tags=["Health"])
 async def health():
     return {"status": "ok"}
+
+
+FRONTEND_DIST = os.path.join(os.path.dirname(__file__), "static")
+
+if os.path.isdir(FRONTEND_DIST):
+    app.mount("/assets", StaticFiles(directory=os.path.join(FRONTEND_DIST, "assets")), name="assets")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def spa(full_path: str):
+        candidate = os.path.join(FRONTEND_DIST, full_path)
+        if full_path and os.path.isfile(candidate):
+            return FileResponse(candidate)
+        return FileResponse(os.path.join(FRONTEND_DIST, "index.html"))

@@ -1,10 +1,10 @@
 services:
   - type: web
-    name: debate-and-win-api
+    name: debate-and-win
     runtime: docker
     plan: free
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     healthCheckPath: /health
     envVars:
       - key: ENV
@@ -16,7 +16,7 @@ services:
       - key: JWT_EXPIRE_MINUTES
         value: "10080"
       - key: CORS_ORIGINS
-        sync: false
+        value: "[]"
 
       - key: ANTHROPIC_API_KEY
         sync: false
