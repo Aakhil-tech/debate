@@ -1,4 +1,4 @@
-export type ScreenId = 'war-room' | 'drop-receipts' | 'fumble-radar' | 'sparring-sandbox' | 'api-hub';
+export type ScreenId = 'war-room' | 'drop-receipts' | 'fumble-radar' | 'sparring-sandbox';
 
 export interface ChatNode {
   id: string;

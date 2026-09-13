@@ -12,7 +12,6 @@ const NAV_ITEMS: { title: string; screen: ScreenId; category: string }[] = [
   { title: 'Screenshots — scan a conversation', screen: 'drop-receipts', category: 'Forensic' },
   { title: 'Check Draft — before you send it', screen: 'fumble-radar', category: 'Draft Detonator' },
   { title: 'Practice Chat — spar against an AI opponent', screen: 'sparring-sandbox', category: 'Sparring' },
-  { title: 'API Tools — developer hub', screen: 'api-hub', category: 'Developer' },
 ];
 
 export const SearchModal: React.FC<SearchModalProps> = ({

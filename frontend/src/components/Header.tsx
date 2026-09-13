@@ -21,7 +21,6 @@ export const Header: React.FC<HeaderProps> = ({
     { id: 'drop-receipts', label: 'Screenshots', icon: 'receipt_long' },
     { id: 'fumble-radar', label: 'Check Draft', icon: 'edit_note' },
     { id: 'sparring-sandbox', label: 'Practice Chat', icon: 'forum' },
-    { id: 'api-hub', label: 'API Tools', icon: 'api' },
   ];
 
   return (
@@ -65,9 +64,6 @@ export const Header: React.FC<HeaderProps> = ({
                 >
                   <span className="material-symbols-outlined text-[16px]">{link.icon}</span>
                   <span>{link.label}</span>
-                  {link.id === 'api-hub' && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block ml-0.5"></span>
-                  )}
                 </button>
               );
             })}

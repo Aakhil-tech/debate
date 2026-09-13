@@ -17,7 +17,6 @@ import { RefereeModal } from './components/RefereeModal';
 import { SearchModal } from './components/SearchModal';
 import { ProfileModal } from './components/ProfileModal';
 import { Toast } from './components/Toast';
-import { ApiHubScreen } from './components/ApiHubScreen';
 import { ForensicReceiptResult, RefereeVerdictResult } from './services/api';
 
 export default function App() {
@@ -120,13 +119,6 @@ export default function App() {
             onOpenReferee={() => setIsRefereeOpen(true)}
             showToast={showToast}
             initialTopic={sparringTopic}
-          />
-        )}
-
-        {currentScreen === 'api-hub' && (
-          <ApiHubScreen
-            showToast={showToast}
-            onNavigateToReceipts={() => handleNavigate('drop-receipts')}
           />
         )}
       </main>

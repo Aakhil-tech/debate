@@ -12,7 +12,6 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentScreen, onSelectScr
     { id: 'drop-receipts', label: 'Screenshots', icon: 'receipt_long' },
     { id: 'fumble-radar', label: 'Check Draft', icon: 'edit_note' },
     { id: 'sparring-sandbox', label: 'Practice', icon: 'forum' },
-    { id: 'api-hub', label: 'API', icon: 'api' },
   ];
 
   return (
