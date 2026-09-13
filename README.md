@@ -1,53 +1,149 @@
-Debate and Win
+Debate & Win 🎯
+Basic Details
 
-Produt Link:
-https://debate-and-win.onrender.com/fumble
+Team Name: Mohammed Aakhil
 
-What is it?
+Team Members
+Team Lead: Aakhil - Cochin University Of Science and Technology
+Project Description
 
-Debate & Win is an AI conversation co-pilot that analyzes screenshots of conversations and tells users what just happened, what it means, and what to do next.
-
-Core loop:
+Debate & Win is an AI-powered conversation co-pilot that analyzes screenshots of conversations and tells users what just happened, what it means, and what to do next.
 
 📸 Screenshot → 🧠 Understand → 🎯 Next Move → 💬 Reply → 📸 New Screenshot → Repeat
 
-Who is it for?
+Product Link:
+https://debate-and-win.onrender.com/fumble
 
-Primarily for young, online users (Gen Z) who want help navigating confusing, awkward, playful, or argumentative conversations—especially conversations with women.
+The Problem (that doesn't exist)
 
-What does it do?
+You sent a message.
 
-Users upload a screenshot of their conversation. The AI:
+They replied:
 
-Reconstructs the conversation and understands the context.
-Explains what is happening right now.
-Identifies shifts in tone, tension, topic, and conversational dynamics.
-Tells the user what their next move should be.
-Generates possible replies in different styles.
-Warns them about replies they should NOT send.
-Shows possible branches depending on how the other person responds.
-Keeps the conversation state so users can return with another screenshot and continue from where they left off.
+"K."
+
+Now you're staring at the screen for 17 minutes wondering:
+
+"Am I cooked?" 💀
+
+People overthink conversations, misread messages, send terrible replies, and realize they fumbled only after pressing send.
+
+The Solution (that nobody asked for)
+
+Upload the receipts. 🧾
+
+Debate & Win uses AI to reconstruct the conversation, understand the context, identify what's happening, and tell you what your next move should be.
+
+It can:
+
+🧠 Explain what just happened
+🎯 Recommend your next move
+💬 Generate possible replies
+🚫 Tell you what NOT to send
+🌳 Show possible conversation branches
+🔥 Detect when you fumbled
+🧾 Point to the actual messages behind its reasoning
+🔄 Maintain conversation context as new screenshots are uploaded
+
+Basically:
+
+Your smartest terminally-online friend sitting beside you while you're texting.
+
+Technical Details
+Technologies/Components Used
+For Software
+
+Languages:
+
+Python
+TypeScript / JavaScript
+HTML / CSS
+
+Frameworks:
+
+React 19
+FastAPI
+Vite
+Tailwind CSS v4
+
+Libraries / Tools:
+
+Groq API
+openai/gpt-oss-120b — text analysis
+qwen/qwen3.8-27b — vision analysis
+JWT Authentication
+PostgreSQL
+Supabase
+Docker
+Uvicorn
+For Hardware
+
+No dedicated hardware required.
+
+The project runs through a web browser and cloud-based AI infrastructure.
+
+Implementation
+For Software
+Installation
+git clone <this-repo>
+cd debate-win-backend
+
+python -m venv venv
+source venv/bin/activate
+
+Install dependencies:
+
+pip install -r requirements.txt
+
+Configure environment variables:
+
+cp .env.example .env
+
+Add:
+
+GROQ_API_KEY=your_key
+SECRET_KEY=your_secret
+SUPABASE_URL=your_url
+SUPABASE_SERVICE_KEY=your_key
+Run
+uvicorn app.main:app --reload --port 8000
+
+Or using Docker:
+
+docker-compose up --build
+Project Documentation
+Screenshots
+1. Debate & Win Dashboard
+
+Caption: Main interface where users can start analyzing their conversation and access the different AI-powered tools.
+
+2. Conversation Analysis
+
+Caption: AI-powered analysis of the conversation, helping the user understand the situation and determine the next move.
+
+3. Fumble Analysis
+
+Caption: Fumble analysis that identifies potential mistakes in the user's conversation and explains what went wrong.
+
+Diagrams
+Workflow
+
+Caption: Debate & Win continuously analyzes the conversation and provides context-aware recommendations as the conversation evolves.
+
+Project Demo
+Video
+
+Demo:
+https://youtu.be/sdlcAjVBTWU
+
+The video demonstrates the Debate & Win interface, screenshot-based conversation analysis, AI reasoning, and recommendations for the user's next move.
 
 
-# Debate & Win — Backend API
+Images:
+<img width="1471" height="841" alt="image" src="https://github.com/user-attachments/assets/9820c7bb-0b90-410f-8c32-61369335ec2b" />
+<img width="1236" height="758" alt="Screenshot 2026-09-13 165143" src="https://github.com/user-attachments/assets/18b61da2-face-4169-8bc9-94edfbfa3f76" />
 
-FastAPI backend for the **Debate & Win** (Receipts AI Text Strategist) app.
-Frontend and backend ship as **one Docker image** — FastAPI serves the React
-build directly, so there's no separate frontend service and no CORS to
-configure in production.
-
-## Stack
-
-| Layer | Tech |
-|---|---|
-| UI | React 19 + Tailwind v4 (built by Vite, served as static files by FastAPI) |
-| API | FastAPI + Uvicorn |
-| Auth | JWT (guest sessions auto-created, no login screen needed) |
-| DB | **Postgres** (default — Docker locally) or **Supabase** (hidden, opt-in via `DB_BACKEND`) |
-| Storage | Local disk (Postgres backend) or Supabase Storage (Supabase backend) |
-| AI | Groq — `openai/gpt-oss-120b` (text) + `qwen/qwen3.8-27b` (vision) |
-| Rate Limiting | In-process sliding window (swap Redis/slowapi for prod) |
-
+<img width="1656" height="841" alt="Screenshot 2026-09-13 160122" src="https://github.com/user-attachments/assets/4468de37-5921-48be-bb61-2ac96160a60c" />
 ## How It Works
 
 ```mermaid
@@ -135,108 +231,17 @@ GET    /war-room/active-case
 
 Full interactive docs at `http://localhost:8000/docs`
 
-Video :
-https://youtu.be/sdlcAjVBTWU
+Live Demo
 
-## Local Setup
+Product:
+https://debate-and-win.onrender.com/fumble
 
-### 1. Prerequisites
+Team Contributions
 
-- Python 3.12+
-- A [Supabase](https://supabase.com) project (free tier works)
-- A [Groq](https://console.groq.com) API key
+Mohammed Aakhil E- Everything
 
-### 2. Clone & install
+Made with ❤️ at TinkerHub Useless Projects
 
-```bash
-git clone <this-repo>
-cd debate-win-backend
-python -m venv venv
-source venv/bin/activate       # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-```
+Drop the screenshot. We'll handle the next move. 💀
 
-### 3. Configure environment
-
-```bash
-cp .env.example .env
-# Edit .env — fill in SUPABASE_URL, SUPABASE_SERVICE_KEY, GROQ_API_KEY, SECRET_KEY
-```
-
-Generate a SECRET_KEY:
-```bash
-python -c "import secrets; print(secrets.token_hex(32))"
-```
-
-### 4. Set up Supabase
-
-1. Go to your Supabase project → **SQL Editor**
-2. Run the migration:
-
-```bash
-cat supabase/migrations/001_init.sql
-# Paste and run in the SQL editor
-```
-
-3. Create a Storage bucket named `receipts` (private):
-   - **Storage** → **New bucket** → name: `receipts`, uncheck Public
-
-4. Copy your keys from **Settings → API**:
-   - `SUPABASE_URL` = Project URL
-   - `SUPABASE_SERVICE_KEY` = `service_role` key (secret!)
-   - `SUPABASE_ANON_KEY` = `anon` key
-
-### 5. Run
-
-```bash
-uvicorn app.main:app --reload --port 8000
-```
-
-Or with Docker:
-```bash
-docker-compose up --build
-```
-
-### 6. Test
-
-```bash
-# Register
-curl -X POST http://localhost:8000/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"you@test.com","password":"testpass123","handle":"overthinker"}'
-
-# Use the returned token for all other calls:
-# -H "Authorization: Bearer <token>"
-```
-
-## Credits System
-
-| Operation | Cost |
-|---|---|
-| Forensic receipt analysis | 3 credits |
-| Fumble radar analysis | 1 credit |
-| Sparring turn (per message) | 1 credit |
-| New user bonus | 20 free credits |
-
-Returns HTTP `402` with `{"error": "insufficient_credits"}` when balance is zero.
-
-## Zero Log Retention
-
-Set `ZERO_LOG_RETENTION=true` (default) to never persist raw message content.
-Only metadata (scores, lengths, timestamps) is stored.
-
-## Production Checklist
-
-- [ ] Set `ENV=production`
-- [ ] Rotate `SECRET_KEY`
-- [ ] Set your real frontend URL in `CORS_ORIGINS`
-- [ ] Replace in-process rate limiter with Redis + `slowapi`
-- [ ] Add Stripe webhook at `POST /credits/stripe-webhook`
-- [ ] Deploy to Railway / Render / Fly.io (single Dockerfile)
-
-Images:
-<img width="1471" height="841" alt="image" src="https://github.com/user-attachments/assets/9820c7bb-0b90-410f-8c32-61369335ec2b" />
-<img width="1236" height="758" alt="Screenshot 2026-09-13 165143" src="https://github.com/user-attachments/assets/18b61da2-face-4169-8bc9-94edfbfa3f76" />
-
-<img width="1656" height="841" alt="Screenshot 2026-09-13 160122" src="https://github.com/user-attachments/assets/4468de37-5921-48be-bb61-2ac96160a60c" />
 
