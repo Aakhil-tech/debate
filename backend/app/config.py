@@ -25,8 +25,8 @@ class Settings(BaseSettings):
     SUPABASE_ANON_KEY: str = ""
 
     GROQ_API_KEY: str = ""
-    GROQ_MODEL: str = "llama-3.3-70b-versatile"
-    GROQ_VISION_MODEL: str = "llama-3.2-90b-vision-preview"
+    GROQ_MODEL: str = "openai/gpt-oss-120b"
+    GROQ_VISION_MODEL: str = "qwen/qwen3.8-27b"
     GROQ_MAX_TOKENS: int = 1500
 
     CREDITS_FORENSIC_ANALYSIS: int = 3
