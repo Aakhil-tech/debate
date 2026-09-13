@@ -27,7 +27,7 @@ export default function App() {
   // Cross-screen state
   const [activeAutopsyData, setActiveAutopsyData] = useState<ForensicReceiptResult | null>(null);
   const [refereeVerdict, setRefereeVerdict] = useState<RefereeVerdictResult | null>(null);
-  const [refereeTopic, setRefereeTopic] = useState<string>('“Who decided on sushi vs tacos last Friday?”');
+  const [refereeTopic, setRefereeTopic] = useState<string>('');
   const [fumbleInitialDraft, setFumbleInitialDraft] = useState<string | undefined>(undefined);
 
   // Modals state
@@ -89,7 +89,7 @@ export default function App() {
         {currentScreen === 'war-room' && (
           <WarRoomScreen
             onNavigate={handleNavigate}
-            onOpenAutopsy={() => setIsAutopsyOpen(true)}
+            onOpenAutopsyWithData={handleOpenAutopsyWithData}
             showToast={showToast}
           />
         )}
@@ -154,7 +154,6 @@ export default function App() {
       <RefereeModal
         isOpen={isRefereeOpen}
         onClose={() => setIsRefereeOpen(false)}
-        userFrame={68}
         verdictData={refereeVerdict}
         topic={refereeTopic}
       />

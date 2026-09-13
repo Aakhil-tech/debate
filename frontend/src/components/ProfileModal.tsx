@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { getStoredStats, refreshStoredStats, subscribeStats, TacticianStats } from '../services/api';
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -7,6 +8,15 @@ interface ProfileModalProps {
 }
 
 export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, showToast }) => {
+  const [stats, setStats] = useState<TacticianStats>(getStoredStats());
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setStats(getStoredStats());
+    refreshStoredStats();
+    return subscribeStats(setStats);
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
@@ -31,49 +41,34 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, sho
             alt="Tactician Avatar"
             src="/logo.jpeg"
             className="w-14 h-14 rounded-full border-2 border-black object-cover"
-            referrerPolicy="no-referrer"
           />
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
-              <span className="font-headline-lg">@overthinker</span>
+              <span className="font-headline-lg">{stats.handle}</span>
               <span className="w-2.5 h-2.5 rounded-full bg-black"></span>
             </div>
             <span className="font-label-sm uppercase font-bold text-on-secondary-fixed">
-              LVL 4 TACTICIAN // PROOF RANK: A+
+              LVL {stats.level} TACTICIAN
             </span>
             <span className="font-body-sm text-xs text-on-secondary-fixed-variant mt-0.5">
-              Forensic Co-Pilot Credits: 12 / 15 remaining
+              Credits remaining: {stats.credits}
             </span>
           </div>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 gap-2 font-body-sm">
+        <div className="grid grid-cols-3 gap-2 font-body-sm">
           <div className="p-3 bg-surface-container-low rounded-xl border border-black/15">
-            <span className="font-label-sm uppercase text-outline block">Drafts Incinerated</span>
-            <span className="font-headline-lg text-primary">47</span>
-            <span className="text-[11px] text-green-700 font-bold block">47 Crises Averted</span>
+            <span className="font-label-sm uppercase text-outline block">Clean Wins</span>
+            <span className="font-headline-lg text-primary">{stats.cleanWins}</span>
           </div>
           <div className="p-3 bg-surface-container-low rounded-xl border border-black/15">
-            <span className="font-label-sm uppercase text-outline block">Sparring Matches</span>
-            <span className="font-headline-lg text-primary">19</span>
-            <span className="text-[11px] text-secondary font-bold block">89% Win Rate</span>
+            <span className="font-label-sm uppercase text-outline block">Drafts Checked</span>
+            <span className="font-headline-lg text-primary">{stats.fumbleFlags}</span>
           </div>
-        </div>
-
-        {/* Badges Earned */}
-        <div className="flex flex-col gap-2">
-          <span className="font-label-sm uppercase font-bold text-outline">Badges Earned</span>
-          <div className="flex flex-wrap gap-2">
-            <span className="px-3 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-sm uppercase font-bold border border-black/20">
-              🛡️ Frame Anchor
-            </span>
-            <span className="px-3 py-1 rounded-full bg-secondary-container text-black font-label-sm uppercase font-bold border border-black/20">
-              ⚡ Zero Double-Texter
-            </span>
-            <span className="px-3 py-1 rounded-full bg-surface-container text-on-surface font-label-sm uppercase font-bold border border-black/20">
-              🔥 Master Incinerator
-            </span>
+          <div className="p-3 bg-surface-container-low rounded-xl border border-black/15">
+            <span className="font-label-sm uppercase text-outline block">Meltdowns</span>
+            <span className="font-headline-lg text-primary">{stats.meltdowns}</span>
           </div>
         </div>
 
@@ -81,12 +76,13 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, sho
         <div className="pt-2 flex flex-col gap-2">
           <button
             onClick={() => {
-              showToast('Account credentials verified & saved');
+              showToast('Profile refreshed');
+              refreshStoredStats();
               onClose();
             }}
             className="w-full py-3 rounded-full bg-primary text-on-primary font-label-md uppercase tracking-wider border-2 border-black hover:opacity-90 transition-opacity cursor-pointer"
           >
-            Save Tactician Config
+            Refresh Stats
           </button>
         </div>
       </div>

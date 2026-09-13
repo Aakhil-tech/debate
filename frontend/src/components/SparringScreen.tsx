@@ -17,59 +17,43 @@ const PERSONAS = [
   { id: 'friend', label: 'Guilt-tripping Friend', emoji: '🎭' },
 ];
 
-const INITIAL_MESSAGES: SparringMessage[] = [
-  {
-    id: 'ai-1',
-    sender: 'ai',
-    text: '“You literally said you didn\'t care, and now you\'re acting like I forced you to eat raw fish.”',
-    time: '19:42:01',
-    fallacy: 'Fallacy: Selective Memory',
-    frameImpact: -12,
-  },
-];
-
 export const SparringScreen: React.FC<SparringScreenProps> = ({
   onOpenRefereeWithVerdict,
   onOpenReferee,
   showToast,
   initialTopic,
 }) => {
-  const [topic, setTopic] = useState(initialTopic || '“Who decided on sushi vs tacos last Friday?”');
-  const [isEditingTopic, setIsEditingTopic] = useState(false);
+  const [topic, setTopic] = useState(initialTopic || '');
+  const [isEditingTopic, setIsEditingTopic] = useState(!initialTopic);
   const [selectedPersona, setSelectedPersona] = useState('defensive_partner');
   const [aggressiveness, setAggressiveness] = useState(8);
-
-  useEffect(() => {
-    if (initialTopic) {
-      setTopic(initialTopic);
-      // Also update initial AI prompt to align with new topic
-      setMessages([
-        {
-          id: `ai-${Date.now()}`,
-          sender: 'ai',
-          text: `“Look, regarding ${initialTopic.replace(/[“"”]/g, '')}, I already gave you my stance. Why are we bringing this up again?”`,
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-          fallacy: 'Fallacy: Stonewalling & Fatigue Induction',
-          frameImpact: -8,
-        },
-      ]);
-    }
-  }, [initialTopic]);
-
-  const [messages, setMessages] = useState<SparringMessage[]>(INITIAL_MESSAGES);
-  const [coachTip, setCoachTip] = useState(
-    'Do not take the “you always do this” bait. Re-anchor strictly to the Friday 7:30 PM WhatsApp timestamp.'
-  );
+  const [messages, setMessages] = useState<SparringMessage[]>([]);
+  const [coachTip, setCoachTip] = useState<string | null>(null);
   const [inputText, setInputText] = useState('');
   const [userFrame, setUserFrame] = useState(68);
   const [isTypingAI, setIsTypingAI] = useState(false);
   const [tapeRecording, setTapeRecording] = useState(false);
   const [callingReferee, setCallingReferee] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (initialTopic) {
+      setTopic(initialTopic);
+      setIsEditingTopic(false);
+      setMessages([]);
+      setCoachTip(null);
+      setUserFrame(68);
+    }
+  }, [initialTopic]);
 
   const handleSendParry = async () => {
     const textToSend = inputText.trim();
     if (!textToSend) {
       showToast('Please type or inject a tactical parry');
+      return;
+    }
+    if (!topic.trim()) {
+      showToast('Set a contested topic first');
       return;
     }
 
@@ -90,6 +74,7 @@ export const SparringScreen: React.FC<SparringScreenProps> = ({
     setMessages(updatedHistory);
     setInputText('');
     setIsTypingAI(true);
+    setError(null);
     showToast('Parry sent! Calculating frame shift... ⚡');
 
     try {
@@ -101,9 +86,9 @@ export const SparringScreen: React.FC<SparringScreenProps> = ({
         userParry: textToSend,
       });
 
-      const newFrame = Math.min(96, Math.max(10, userFrame + (result.frameDelta || 5)));
+      const newFrame = Math.min(96, Math.max(10, userFrame + (result.frameDelta || 0)));
       setUserFrame(newFrame);
-      setCoachTip(result.coachTip || 'Re-anchor on verifiable chat history timestamps.');
+      setCoachTip(result.coachTip || null);
 
       const aiMsg: SparringMessage = {
         id: `ai-${Date.now()}`,
@@ -114,27 +99,15 @@ export const SparringScreen: React.FC<SparringScreenProps> = ({
           minute: '2-digit',
           second: '2-digit',
         }),
-        fallacy: result.fallacy,
+        fallacy: result.fallacy || undefined,
       };
 
       setMessages((prev) => [...prev, aiMsg]);
       showToast(`Frame updated: ${newFrame}% in your favor (${result.frameDelta > 0 ? '+' : ''}${result.frameDelta}%)`);
     } catch (err: any) {
       console.error('Sparring error:', err);
-      // Calibrated local turn
-      const fallbackAiMsg: SparringMessage = {
-        id: `ai-${Date.now()}`,
-        sender: 'ai',
-        text: '“Okay but you literally read the menu for 15 minutes before we left the car without objecting.”',
-        time: new Date().toLocaleTimeString([], {
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-        }),
-        fallacy: 'Fallacy: Moving the Goalposts',
-      };
-      setMessages((prev) => [...prev, fallbackAiMsg]);
-      setUserFrame((prev) => Math.min(94, prev + 4));
+      setError(err?.message || 'Could not reach the opponent — try again');
+      showToast('Parry failed to send — try again');
     } finally {
       setIsTypingAI(false);
     }
@@ -142,6 +115,7 @@ export const SparringScreen: React.FC<SparringScreenProps> = ({
 
   const handleCallReferee = async () => {
     setCallingReferee(true);
+    setError(null);
     showToast('Calling Head Arbitrator to assess debate transcript... ⚖️');
     try {
       const verdict = await getRefereeVerdict({
@@ -165,31 +139,8 @@ export const SparringScreen: React.FC<SparringScreenProps> = ({
       }
       showToast('Official arbitration ruling ready!');
     } catch (err: any) {
-      console.warn('Referee network warning, using calibrated ruling:', err);
-      const isWinner = userFrame >= 50;
-      const fallbackVerdict = {
-        winner: (isWinner ? 'user' : 'ai') as 'user' | 'ai' | 'draw',
-        rulingTitle: isWinner ? 'VERDICT: USER REIGNS SUPREME' : 'VERDICT: SPLIT CONCESSION',
-        scorecard: {
-          timestampAnchoring: 'Flawless',
-          fallaciesDetectedUser: 0,
-          fallaciesDetectedAi: 2,
-          finalFrameUser: userFrame,
-          finalFrameAi: 100 - userFrame,
-        },
-        arbitratorNote:
-          'The adversary attempted multiple deflections. The user maintained frame, anchored to timestamp evidence, and avoided emotional concessions.',
-        cloutPoints: 25,
-      };
-      if (fallbackVerdict.winner === 'user') {
-        recordWin(fallbackVerdict.cloutPoints);
-      }
-      if (onOpenRefereeWithVerdict) {
-        onOpenRefereeWithVerdict(fallbackVerdict, topic);
-      } else {
-        onOpenReferee();
-      }
-      showToast('Arbitration ruling rendered! ⚖️');
+      console.error('Referee error:', err);
+      showToast(err?.message || 'Could not reach the referee — try again');
     } finally {
       setCallingReferee(false);
     }
@@ -198,19 +149,14 @@ export const SparringScreen: React.FC<SparringScreenProps> = ({
   const handleInjectTactic = (tactic: 'strike' | 'shift' | 'concession') => {
     let injected = '';
     if (tactic === 'strike') {
-      injected = "The chat history at 19:30 explicitly records 'either is fine', which disproves your claim.";
+      injected = 'Point to the specific facts or timestamps that support your position.';
     } else if (tactic === 'shift') {
-      injected = 'You are evading the primary point: who placed the final order without confirmation?';
+      injected = 'You are evading the actual point — answer that directly.';
     } else {
-      injected = 'I agree communication was brief, but unilateral action was not authorized.';
+      injected = 'I agree part of that is fair, but the core issue still stands.';
     }
     setInputText(injected);
     showToast('Tactical parry injected into argument chamber');
-  };
-
-  const handleVoiceSim = () => {
-    setInputText("Timestamp 19:42 explicitly disproves that. Let's inspect the actual receipts.");
-    showToast('Voice transcription injected into parry field');
   };
 
   const toggleTape = () => {
@@ -230,8 +176,6 @@ export const SparringScreen: React.FC<SparringScreenProps> = ({
         </div>
         <div className="flex items-center gap-2 font-label-sm text-label-sm text-secondary-fixed uppercase font-bold">
           <span>ROUND {Math.floor(messages.length / 2) + 1}</span>
-          <span>•</span>
-          <span>MATCH ID #7729</span>
         </div>
       </div>
 
@@ -248,23 +192,13 @@ export const SparringScreen: React.FC<SparringScreenProps> = ({
               LIVE MAT
             </div>
 
-            {/* Architectural Wireframe Illustration */}
             <svg
               className="w-48 h-20 text-on-surface"
               fill="none"
               viewBox="0 0 200 80"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <rect
-                fill="#FFE853"
-                height="46"
-                rx="2"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                width="160"
-                x="20"
-                y="30"
-              />
+              <rect fill="#FFE853" height="46" rx="2" stroke="currentColor" strokeWidth="1.8" width="160" x="20" y="30" />
               <path d="M10 32L100 8L190 32H10Z" fill="#FFFFFF" stroke="currentColor" strokeWidth="1.8" />
               <rect fill="#FFFFFF" height="32" stroke="currentColor" strokeWidth="1.5" width="16" x="35" y="44" />
               <rect fill="#FFFFFF" height="32" stroke="currentColor" strokeWidth="1.5" width="16" x="65" y="44" />
@@ -278,7 +212,6 @@ export const SparringScreen: React.FC<SparringScreenProps> = ({
             </span>
           </div>
 
-          {/* Card Core Meta */}
           <div className="p-4 flex flex-col gap-2">
             <div className="flex items-center justify-between">
               <span className="font-label-sm text-label-sm uppercase px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface font-bold border border-black/10">
@@ -298,11 +231,12 @@ export const SparringScreen: React.FC<SparringScreenProps> = ({
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
                 className="w-full p-2 text-sm bg-surface-container-low border border-black rounded-lg font-bold"
-                placeholder="Enter custom debate topic..."
+                placeholder="What's the disagreement about?"
+                autoFocus
               />
             ) : (
               <h2 className="font-display-lg-mobile text-display-lg-mobile text-on-surface leading-tight">
-                {topic}
+                {topic || 'No topic set yet'}
               </h2>
             )}
 
@@ -339,19 +273,13 @@ export const SparringScreen: React.FC<SparringScreenProps> = ({
                 </span>
               </div>
               <div className="w-full h-3 rounded-full bg-surface-container overflow-hidden flex shadow-inner border border-black/20">
-                <div
-                  className="h-full bg-primary transition-all duration-500"
-                  style={{ width: `${userFrame}%` }}
-                ></div>
-                <div
-                  className="h-full bg-secondary-fixed transition-all duration-500"
-                  style={{ width: `${aiChaos}%` }}
-                ></div>
+                <div className="h-full bg-primary transition-all duration-500" style={{ width: `${userFrame}%` }}></div>
+                <div className="h-full bg-secondary-fixed transition-all duration-500" style={{ width: `${aiChaos}%` }}></div>
               </div>
             </div>
           </div>
 
-          {/* 2x2 Matrix Block in Reference Style */}
+          {/* 2x2 Matrix Block */}
           <div className="grid grid-cols-2 bg-surface-container-highest gap-[1.5px] border-t-2 border-black">
             <div className="p-3.5 bg-surface-container-lowest flex items-center justify-between">
               <div className="flex flex-col">
@@ -403,6 +331,15 @@ export const SparringScreen: React.FC<SparringScreenProps> = ({
 
         {/* Live Sparring Dialogue Stack */}
         <div className="flex flex-col gap-3">
+          {messages.length === 0 && (
+            <div className="p-6 text-center flex flex-col items-center gap-2 border border-dashed border-black/15 rounded-xl bg-surface-container-lowest">
+              <span className="material-symbols-outlined text-[28px] text-on-surface-variant">forum</span>
+              <span className="font-body-sm text-body-sm text-on-surface-variant">
+                Set a topic and send your first parry to begin.
+              </span>
+            </div>
+          )}
+
           {messages.map((msg) => (
             <div
               key={msg.id}
@@ -446,19 +383,26 @@ export const SparringScreen: React.FC<SparringScreenProps> = ({
             </div>
           )}
 
-          {/* Tactical Coach Whisper Banner */}
-          <div className="w-full rounded-xl p-4 bg-tertiary-fixed text-on-tertiary-fixed flex flex-col gap-1 shadow-[2px_2px_0px_#000000] border-2 border-black">
-            <div className="flex items-center justify-between font-label-sm text-label-sm uppercase">
-              <span className="flex items-center gap-1 font-bold">
-                <span className="material-symbols-outlined text-[16px]">lightbulb</span>
-                Coach Whisper
-              </span>
-              <span className="px-2 py-0.5 bg-tertiary-container text-on-tertiary-container rounded-full text-label-sm font-bold">
-                TACTIC
-              </span>
+          {error && (
+            <div className="p-3 bg-error-container text-on-error-container rounded-xl border border-error/30 text-sm font-body-sm">
+              {error}
             </div>
-            <p className="font-body-sm text-body-sm text-on-tertiary-fixed font-medium mt-1">{coachTip}</p>
-          </div>
+          )}
+
+          {coachTip && (
+            <div className="w-full rounded-xl p-4 bg-tertiary-fixed text-on-tertiary-fixed flex flex-col gap-1 shadow-[2px_2px_0px_#000000] border-2 border-black">
+              <div className="flex items-center justify-between font-label-sm text-label-sm uppercase">
+                <span className="flex items-center gap-1 font-bold">
+                  <span className="material-symbols-outlined text-[16px]">lightbulb</span>
+                  Coach Whisper
+                </span>
+                <span className="px-2 py-0.5 bg-tertiary-container text-on-tertiary-container rounded-full text-label-sm font-bold">
+                  TACTIC
+                </span>
+              </div>
+              <p className="font-body-sm text-body-sm text-on-tertiary-fixed font-medium mt-1">{coachTip}</p>
+            </div>
+          )}
         </div>
 
         {/* Quick Strike Tactics Row */}
@@ -524,19 +468,10 @@ export const SparringScreen: React.FC<SparringScreenProps> = ({
           </div>
           <div className="flex items-center gap-2">
             <button
-              id="btn-audio"
-              aria-label="Voice Parry"
-              onClick={handleVoiceSim}
-              className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface shadow-[0_2px_0px_#000000] border border-black cursor-pointer hover:bg-secondary-container transition-colors"
-              title="Speak parry"
-            >
-              <span className="material-symbols-outlined text-[20px]">mic</span>
-            </button>
-            <button
               id="btn-send-parry"
               onClick={handleSendParry}
-              disabled={isTypingAI}
-              className="flex-1 py-3 rounded-full bg-primary text-on-primary font-headline-md text-headline-md uppercase flex items-center justify-center gap-2 shadow-[0_2px_0px_#000000] active:translate-y-0.5 transition-transform cursor-pointer border-2 border-black hover:opacity-90"
+              disabled={isTypingAI || !topic.trim()}
+              className="flex-1 py-3 rounded-full bg-primary text-on-primary font-headline-md text-headline-md uppercase flex items-center justify-center gap-2 shadow-[0_2px_0px_#000000] active:translate-y-0.5 transition-transform cursor-pointer border-2 border-black hover:opacity-90 disabled:opacity-50"
             >
               <span>{isTypingAI ? 'PARRYING...' : 'Send Parry'}</span>
               <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
@@ -549,8 +484,8 @@ export const SparringScreen: React.FC<SparringScreenProps> = ({
           <button
             id="btn-verdict"
             onClick={handleCallReferee}
-            disabled={callingReferee}
-            className="w-full py-4 px-4 rounded-full bg-primary text-on-primary font-headline-md text-headline-md uppercase tracking-wider flex items-center justify-center gap-3 shadow-[4px_4px_0px_#000000] active:translate-y-1 transition-transform border-2 border-black cursor-pointer hover:bg-secondary hover:text-white"
+            disabled={callingReferee || messages.length < 2}
+            className="w-full py-4 px-4 rounded-full bg-primary text-on-primary font-headline-md text-headline-md uppercase tracking-wider flex items-center justify-center gap-3 shadow-[4px_4px_0px_#000000] active:translate-y-1 transition-transform border-2 border-black cursor-pointer hover:bg-secondary hover:text-white disabled:opacity-50"
           >
             <span className={`material-symbols-outlined text-[22px] text-secondary-fixed ${callingReferee ? 'animate-spin' : ''}`}>
               {callingReferee ? 'refresh' : 'gavel'}

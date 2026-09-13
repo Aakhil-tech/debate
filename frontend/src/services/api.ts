@@ -208,6 +208,26 @@ export async function analyzeReceipts(params: {
   return mapForensicResult(res);
 }
 
+export async function getCase(caseId: string): Promise<ForensicReceiptResult> {
+  const res = await apiFetch(`/receipts/${caseId}`);
+  if (!res.ok) throw new Error(`Failed to load case: ${res.status}`);
+  return mapForensicResult(await res.json());
+}
+
+interface BackendCaseSummary {
+  case_id: string;
+  title: string;
+  created_at: string;
+  subtextScore: number;
+  frameLossPct: number;
+}
+
+export async function listCases(): Promise<BackendCaseSummary[]> {
+  const res = await apiFetch("/receipts/");
+  if (!res.ok) return [];
+  return res.json();
+}
+
 // No standalone OCR endpoint on the backend — OCR + forensic analysis happen together
 // in analyzeReceipts(). These return an empty shape so callers that merge
 // `ocrRes.field || forensicRes.field` fall through to the real analysis data,
@@ -487,16 +507,6 @@ export async function getRefereeVerdict(params: {
 }
 
 // ---------------------------------------------------------------------------
-// 4. War Room Stance Calibration
-// ---------------------------------------------------------------------------
-// No backend equivalent exists for tone calibration — returning an empty
-// variants array is intentional: WarRoomScreen already falls back to its own
-// built-in DEFAULT_PAYLOADS whenever this comes back empty.
-export async function calibratePayload(_mode: string, _context?: string): Promise<{ variants: string[] }> {
-  return { variants: [] };
-}
-
-// ---------------------------------------------------------------------------
 // 5. Local Tactician Stats Manager — backed by the real /war-room/stats
 // ---------------------------------------------------------------------------
 export interface TacticianStats {
@@ -507,6 +517,9 @@ export interface TacticianStats {
   clout: number;
   handle: string;
   level: number;
+  credits: number;
+  recommendedMove: string | null;
+  activeTargetAudit: { case_id: string; title: string; subtextScore: number; frameLossPct: number } | null;
 }
 
 const STATS_KEY = "dw_tactician_stats_v3";
@@ -519,7 +532,18 @@ const DEFAULT_STATS: TacticianStats = {
   clout: 0,
   handle: "@tactician",
   level: 1,
+  credits: 0,
+  recommendedMove: null,
+  activeTargetAudit: null,
 };
+
+type StatsListener = (stats: TacticianStats) => void;
+const statsListeners = new Set<StatsListener>();
+
+export function subscribeStats(listener: StatsListener): () => void {
+  statsListeners.add(listener);
+  return () => statsListeners.delete(listener);
+}
 
 export function getStoredStats(): TacticianStats {
   try {
@@ -537,6 +561,7 @@ export function saveStoredStats(stats: TacticianStats): void {
   } catch {
     // ignore
   }
+  statsListeners.forEach((l) => l(stats));
 }
 
 interface BackendWarRoomStats {
@@ -546,17 +571,19 @@ interface BackendWarRoomStats {
   fumble_flags: number;
   meltdowns: number;
   credits: number;
+  recommended_move: string;
+  active_target_audit: { case_id: string; title: string; subtext_score: number; frame_loss_pct: number } | null;
 }
 
-// Fire-and-forget refresh from the real backend, run at app boot so
-// getStoredStats() (called synchronously by WarRoomScreen on mount) already
-// has fresh data cached by the time the screen renders.
-export async function refreshStoredStats(): Promise<void> {
+// Refresh from the real backend. Run at app boot, and again after any action
+// that changes server-side stats, so getStoredStats() (read synchronously by
+// components on mount) reflects reality rather than a stale/fake default.
+export async function refreshStoredStats(): Promise<TacticianStats | null> {
   try {
     const res = await apiFetch("/war-room/stats");
-    if (!res.ok) return;
+    if (!res.ok) return null;
     const data: BackendWarRoomStats = await res.json();
-    saveStoredStats({
+    const stats: TacticianStats = {
       cleanWins: data.clean_wins,
       fumbleFlags: data.fumble_flags,
       meltdowns: data.meltdowns,
@@ -564,34 +591,39 @@ export async function refreshStoredStats(): Promise<void> {
       clout: data.clean_wins * 25,
       handle: `@${data.handle}`,
       level: data.level,
-    });
+      credits: data.credits,
+      recommendedMove: data.recommended_move,
+      activeTargetAudit: data.active_target_audit
+        ? {
+            case_id: data.active_target_audit.case_id,
+            title: data.active_target_audit.title,
+            subtextScore: data.active_target_audit.subtext_score,
+            frameLossPct: data.active_target_audit.frame_loss_pct,
+          }
+        : null,
+    };
+    saveStoredStats(stats);
+    return stats;
   } catch {
     // offline / cold start — keep whatever's cached locally
+    return null;
   }
 }
 
-export function recordWin(cloutDelta: number = 25): TacticianStats {
+export function recordWin(_cloutDelta: number = 25): TacticianStats {
   const stats = getStoredStats();
-  stats.cleanWins += 1;
-  stats.clout += cloutDelta;
-  stats.level = Math.floor(stats.cleanWins / 2) + 1;
-  saveStoredStats(stats);
   refreshStoredStats();
   return stats;
 }
 
 export function recordFumble(): TacticianStats {
   const stats = getStoredStats();
-  stats.fumbleFlags += 1;
-  saveStoredStats(stats);
   refreshStoredStats();
   return stats;
 }
 
 export function recordMeltdown(): TacticianStats {
   const stats = getStoredStats();
-  stats.meltdowns += 1;
-  saveStoredStats(stats);
   refreshStoredStats();
   return stats;
 }

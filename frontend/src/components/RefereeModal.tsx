@@ -4,7 +4,6 @@ import { RefereeVerdictResult } from '../services/api';
 interface RefereeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  userFrame: number;
   verdictData?: RefereeVerdictResult | null;
   topic?: string;
 }
@@ -12,30 +11,33 @@ interface RefereeModalProps {
 export const RefereeModal: React.FC<RefereeModalProps> = ({
   isOpen,
   onClose,
-  userFrame,
   verdictData,
   topic,
 }) => {
   if (!isOpen) return null;
 
-  const isUserWinner = verdictData ? verdictData.winner === 'user' : userFrame >= 50;
-  const rulingTitle =
-    verdictData?.rulingTitle ||
-    (isUserWinner ? 'RESULT: CLEAR & EFFECTIVE' : 'RESULT: BALANCED OUTCOME');
-  const contestTopic = topic || '“Who decided on sushi vs tacos last Friday?”';
-  const cloutPoints = verdictData?.cloutPoints || 25;
+  if (!verdictData) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+        <div className="w-full max-w-md bg-surface-container-lowest rounded-2xl p-6 shadow-[6px_6px_0px_#000000] border-2 border-black flex flex-col gap-4 items-center text-center">
+          <span className="material-symbols-outlined text-[32px] text-on-surface-variant">gavel</span>
+          <p className="font-body-sm text-body-sm text-on-surface-variant">No verdict yet.</p>
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded-full bg-primary text-on-primary font-label-md uppercase font-bold cursor-pointer"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-  const scorecard = verdictData?.scorecard || {
-    timestampAnchoring: 'Clear',
-    fallaciesDetectedUser: 0,
-    fallaciesDetectedAi: 2,
-    finalFrameUser: userFrame,
-    finalFrameAi: 100 - userFrame,
-  };
-
-  const arbitratorNote =
-    verdictData?.arbitratorNote ||
-    '“You stayed calm and focused on facts rather than emotion. This de-escalated tension while making your point clearly.”';
+  const rulingTitle = verdictData.rulingTitle;
+  const contestTopic = topic || 'this match';
+  const cloutPoints = verdictData.cloutPoints;
+  const scorecard = verdictData.scorecard;
+  const arbitratorNote = verdictData.arbitratorNote;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">

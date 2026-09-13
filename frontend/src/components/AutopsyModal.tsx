@@ -18,19 +18,34 @@ export const AutopsyModal: React.FC<AutopsyModalProps> = ({
 }) => {
   if (!isOpen) return null;
 
+  if (!caseData || caseData.nodes.length === 0) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+        <div className="w-full max-w-md bg-surface-container-lowest rounded-2xl p-6 shadow-[6px_6px_0px_#000000] border-2 border-black flex flex-col gap-4 items-center text-center">
+          <span className="material-symbols-outlined text-[32px] text-on-surface-variant">receipt_long</span>
+          <p className="font-body-sm text-body-sm text-on-surface-variant">No case data to show yet.</p>
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded-full bg-primary text-on-primary font-label-md uppercase font-bold cursor-pointer"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // Find the locked target node if available
   const targetNode =
-    caseData?.nodes?.find((n) => n.badge?.toLowerCase().includes('target')) ||
-    caseData?.nodes?.[caseData.nodes.length - 1];
+    caseData.nodes.find((n) => n.badge?.toLowerCase().includes('target')) ||
+    caseData.nodes[caseData.nodes.length - 1];
 
-  const targetText = targetNode?.text || 'Fine.';
-  const latencyText = targetNode?.latency || '34m 12s';
+  const targetText = targetNode?.text || '';
+  const latencyText = targetNode?.latency || '';
   const charLength = targetText.length;
-  const wordCount = targetText.trim().split(/\s+/).length;
-  const subtextSummary =
-    caseData?.forensic_summary ||
-    'The target used terminal punctuation and maximum economy of phrasing to invert leverage. Any eager follow-up question confirms guilt or insecurity.';
-  const tacticalCounter = caseData?.tactical_move || '“Sounds good. Catch you at 8:30.”';
+  const wordCount = targetText.trim() ? targetText.trim().split(/\s+/).length : 0;
+  const subtextSummary = caseData.forensic_summary;
+  const tacticalCounter = caseData.tactical_move;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
@@ -72,7 +87,7 @@ export const AutopsyModal: React.FC<AutopsyModalProps> = ({
               What this means
             </span>
             <span className="px-2 py-0.5 rounded-full bg-black text-white font-label-sm text-[10px] font-bold uppercase">
-              {caseData?.subtext_score || 92}/100 Tension
+              {caseData.subtext_score}/100 Tension
             </span>
           </div>
           <p className="font-body-md text-body-md leading-relaxed text-on-tertiary-fixed font-medium">

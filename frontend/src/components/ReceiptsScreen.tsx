@@ -18,249 +18,21 @@ interface ReceiptsScreenProps {
   showToast: (msg: string) => void;
 }
 
-const INITIAL_CASE: ForensicReceiptResult = {
-  case_id: 'case-4092-a',
-  title: "Single-word 'Fine.' Autopsy",
-  node_count: 4,
-  subtext_score: 98,
-  frame_loss_pct: 78,
-  ego_deficit_pct: 38,
-  tactical_move: '“Sounds good. Catch you at 8:30.”',
-  forensic_summary:
-    'The target used terminal brevity (“Fine.”) to invert leverage. Eager clarification immediately surrendered frame dominance.',
-  raw_ocr_text:
-    "10:42 PM\nYou: Hey are we still on for Saturday 8pm?\nDelivered\n\n11:06 PM\nThem: Maybe. Work is crazy right now.\n\n11:07 PM\nYou: Let me know I can book the table now.\nDelivered\n\n11:30 PM\nThem: Fine.\nRead 11:30 PM",
-  detected_app: 'Apple iMessage',
-  ocr_confidence: 98.4,
-  bubbles_detected: 4,
-  nodes: [
-    {
-      id: 'node-1',
-      sender: 'you',
-      text: 'Hey are we still on for Saturday 8pm?',
-      timestamp: '10:42 PM',
-      latency: 'Latency 8m',
-      badge: 'Explicit E4',
-      readReceipt: true,
-    },
-    {
-      id: 'node-2',
-      sender: 'them',
-      text: 'Maybe. Work is crazy right now.',
-      timestamp: '11:06 PM',
-      latency: 'Latency 24m',
-      badge: 'Passive Avoidant',
-      subtextBadge: 'Plausible Deniability Buffer',
-      readReceipt: true,
-    },
-    {
-      id: 'node-3',
-      sender: 'you',
-      text: 'Let me know I can book the table now.',
-      timestamp: '11:07 PM',
-      latency: 'Latency 58s',
-      badge: 'Over-Investment',
-      errorCallout: 'Unforced Error: 58s response time',
-      readReceipt: true,
-    },
-    {
-      id: 'node-4',
-      sender: 'them',
-      text: 'Fine.',
-      timestamp: '11:30 PM',
-      latency: 'Latency 23m',
-      badge: 'Locked Target',
-      subtextBadge: '1 Word • Lethal Brevity',
-      readReceipt: true,
-    },
-  ],
+const EMPTY_CASE: ForensicReceiptResult = {
+  case_id: '',
+  title: '',
+  node_count: 0,
+  subtext_score: 0,
+  frame_loss_pct: 0,
+  ego_deficit_pct: 0,
+  tactical_move: '',
+  forensic_summary: '',
+  raw_ocr_text: '',
+  detected_app: '',
+  ocr_confidence: 0,
+  bubbles_detected: 0,
+  nodes: [],
 };
-
-// Helper: draw realistic chat screenshots for instant OCR testing
-function generateSampleScreenshot(type: 'imessage' | 'whatsapp' | 'instagram'): string {
-  const canvas = document.createElement('canvas');
-  canvas.width = 440;
-  canvas.height = 480;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return '';
-
-  if (type === 'imessage') {
-    // Apple iMessage Mockup
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, 440, 480);
-    // Header Bar
-    ctx.fillStyle = '#f6f6f6';
-    ctx.fillRect(0, 0, 440, 68);
-    ctx.fillStyle = '#007aff';
-    ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, sans-serif';
-    ctx.fillText('‹ Messages', 16, 42);
-    ctx.fillStyle = '#1c1c1e';
-    ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('Alex (Target) 📍', 220, 36);
-    ctx.font = '11px -apple-system, BlinkMacSystemFont, sans-serif';
-    ctx.fillStyle = '#8e8e93';
-    ctx.fillText('iMessage • Today 11:30 PM', 220, 54);
-
-    // Bubble 1 (Right - You)
-    drawRoundedRect(ctx, 170, 95, 250, 48, 18, '#007aff');
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '14px -apple-system, BlinkMacSystemFont, sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText('Hey are we still on for Saturday 8pm?', 185, 124);
-    ctx.fillStyle = '#8e8e93';
-    ctx.font = '10px sans-serif';
-    ctx.textAlign = 'right';
-    ctx.fillText('Delivered 10:42 PM', 420, 156);
-
-    // Bubble 2 (Left - Them)
-    drawRoundedRect(ctx, 20, 175, 250, 48, 18, '#e9e9eb');
-    ctx.fillStyle = '#000000';
-    ctx.font = '14px -apple-system, BlinkMacSystemFont, sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText('Maybe. Work is crazy right now.', 35, 204);
-
-    // Bubble 3 (Right - You)
-    drawRoundedRect(ctx, 160, 245, 260, 48, 18, '#007aff');
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '14px -apple-system, BlinkMacSystemFont, sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText('Let me know I can book table now.', 175, 274);
-
-    // Bubble 4 (Left - Them: Target)
-    drawRoundedRect(ctx, 20, 320, 90, 46, 18, '#e9e9eb');
-    ctx.fillStyle = '#000000';
-    ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText('Fine.', 44, 348);
-    ctx.fillStyle = '#8e8e93';
-    ctx.font = '11px sans-serif';
-    ctx.fillText('Read 11:30 PM', 24, 385);
-  } else if (type === 'whatsapp') {
-    // WhatsApp Mockup
-    ctx.fillStyle = '#efeae2';
-    ctx.fillRect(0, 0, 440, 480);
-    // WhatsApp Header
-    ctx.fillStyle = '#075e54';
-    ctx.fillRect(0, 0, 440, 68);
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 16px sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText('← Jordan (WhatsApp)', 20, 42);
-
-    // Bubble 1 (Right)
-    drawRoundedRect(ctx, 160, 95, 260, 52, 12, '#dcf8c6');
-    ctx.fillStyle = '#111b21';
-    ctx.font = '14px sans-serif';
-    ctx.fillText('Are you mad at me or something?', 175, 122);
-    ctx.font = '10px sans-serif';
-    ctx.fillStyle = '#667781';
-    ctx.textAlign = 'right';
-    ctx.fillText('14:15  ✓✓', 410, 140);
-
-    // Bubble 2 (Left - 3 hours later)
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#54656f';
-    ctx.font = 'bold 11px sans-serif';
-    ctx.fillText('— 3 HOURS LATER —', 220, 185);
-
-    drawRoundedRect(ctx, 20, 210, 270, 54, 12, '#ffffff');
-    ctx.fillStyle = '#111b21';
-    ctx.textAlign = 'left';
-    ctx.font = '14px sans-serif';
-    ctx.fillText('No. Just had things to do.', 35, 240);
-    ctx.font = '10px sans-serif';
-    ctx.fillStyle = '#667781';
-    ctx.textAlign = 'right';
-    ctx.fillText('17:42', 280, 258);
-
-    // Bubble 3 (Right)
-    drawRoundedRect(ctx, 180, 290, 240, 52, 12, '#dcf8c6');
-    ctx.fillStyle = '#111b21';
-    ctx.textAlign = 'left';
-    ctx.font = '14px sans-serif';
-    ctx.fillText('Okay sorry for bothering you!', 195, 318);
-    ctx.font = '10px sans-serif';
-    ctx.fillStyle = '#667781';
-    ctx.textAlign = 'right';
-    ctx.fillText('17:43  ✓✓', 410, 336);
-
-    // Bubble 4 (Left - Target)
-    drawRoundedRect(ctx, 20, 365, 100, 46, 12, '#ffffff');
-    ctx.fillStyle = '#111b21';
-    ctx.textAlign = 'left';
-    ctx.font = 'bold 15px sans-serif';
-    ctx.fillText('K.', 44, 394);
-  } else {
-    // Instagram DM Mockup
-    ctx.fillStyle = '#121212';
-    ctx.fillRect(0, 0, 440, 480);
-    // Header
-    ctx.fillStyle = '#1f1f1f';
-    ctx.fillRect(0, 0, 440, 68);
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 15px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('taylor.v • Active now', 220, 40);
-
-    // Bubble 1 (Right)
-    drawRoundedRect(ctx, 170, 100, 250, 48, 20, '#3797f0');
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '14px sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText('Did you see what I sent earlier?', 185, 129);
-
-    // Bubble 2 (Left)
-    drawRoundedRect(ctx, 20, 180, 240, 48, 20, '#262626');
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '14px sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText('Yeah saw it.', 35, 209);
-
-    // Bubble 3 (Right)
-    drawRoundedRect(ctx, 160, 260, 260, 48, 20, '#3797f0');
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '14px sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText('So what do you think we do?', 175, 289);
-
-    // Bubble 4 (Target)
-    drawRoundedRect(ctx, 20, 340, 190, 46, 20, '#262626');
-    ctx.fillStyle = '#e0e0e0';
-    ctx.font = 'italic 13px sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText('Liked a message', 35, 368);
-    ctx.font = '10px sans-serif';
-    ctx.fillStyle = '#a8a8a8';
-    ctx.fillText('Seen 23m ago', 24, 410);
-  }
-
-  return canvas.toDataURL('image/png');
-}
-
-function drawRoundedRect(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  radius: number,
-  fillColor: string
-) {
-  ctx.beginPath();
-  ctx.moveTo(x + radius, y);
-  ctx.lineTo(x + width - radius, y);
-  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-  ctx.lineTo(x + width, y + height - radius);
-  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-  ctx.lineTo(x + radius, y + height);
-  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-  ctx.lineTo(x, y + radius);
-  ctx.quadraticCurveTo(x, y, x + radius, y);
-  ctx.closePath();
-  ctx.fillStyle = fillColor;
-  ctx.fill();
-}
 
 export const ReceiptsScreen: React.FC<ReceiptsScreenProps> = ({
   onNavigate,
@@ -271,7 +43,7 @@ export const ReceiptsScreen: React.FC<ReceiptsScreenProps> = ({
   onOpenOcrStudio,
   showToast,
 }) => {
-  const [caseData, setCaseData] = useState<ForensicReceiptResult>(INITIAL_CASE);
+  const [caseData, setCaseData] = useState<ForensicReceiptResult>(EMPTY_CASE);
   const [analyzing, setAnalyzing] = useState(false);
   const [activeTacticalInsight, setActiveTacticalInsight] = useState<string | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -280,19 +52,9 @@ export const ReceiptsScreen: React.FC<ReceiptsScreenProps> = ({
   const [isTextMode, setIsTextMode] = useState(false);
   const [isUrlMode, setIsUrlMode] = useState(false);
   const [urlInput, setUrlInput] = useState('');
-  const [transcriptText, setTranscriptText] = useState(
-    'You: Hey are we still on for Saturday 8pm?\nThem: Maybe. Work is crazy right now.\nYou: Let me know I can book the table now.\nThem: Fine.'
-  );
+  const [transcriptText, setTranscriptText] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Initialize sample preview if none set
-  useEffect(() => {
-    if (!previewImage) {
-      const sample = generateSampleScreenshot('imessage');
-      setPreviewImage(sample);
-    }
-  }, []);
 
   // Global paste handler: users can press Ctrl+V anywhere on page to OCR screenshots
   useEffect(() => {
@@ -427,15 +189,6 @@ export const ReceiptsScreen: React.FC<ReceiptsScreenProps> = ({
     }
   };
 
-  const handleSelectPreset = (preset: 'imessage' | 'whatsapp' | 'instagram') => {
-    const dataUrl = generateSampleScreenshot(preset);
-    const titles = {
-      imessage: "iMessage: The 'Fine.' Brush-off",
-      whatsapp: "WhatsApp: Left on Read 3h",
-      instagram: "Instagram DM: Reaction-only Dismissal",
-    };
-    processImage(dataUrl, titles[preset]);
-  };
 
   const handleAnalyzeTranscript = async () => {
     if (!transcriptText.trim()) {
@@ -659,43 +412,6 @@ export const ReceiptsScreen: React.FC<ReceiptsScreenProps> = ({
               </div>
             </div>
           )}
-
-          {/* Preset Sample Selector (Instant 1-Click Testing) */}
-          <div className="p-3 bg-surface-container-lowest border-b-2 border-black">
-            <div className="flex items-center justify-between mb-2">
-              <span className="font-label-sm text-[11px] uppercase font-bold text-on-surface-variant flex items-center gap-1">
-                <span className="material-symbols-outlined text-[13px] text-secondary">flash_on</span>
-                Try a Sample Chat:
-              </span>
-              <span className="text-[10px] text-outline uppercase font-semibold">1-Click Test</span>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                onClick={() => handleSelectPreset('imessage')}
-                disabled={analyzing}
-                className="px-2 py-2 rounded-lg bg-surface-container-low hover:bg-secondary-container border border-black/20 text-left transition-colors flex flex-col gap-0.5 cursor-pointer"
-              >
-                <span className="text-[11px] font-bold uppercase truncate">💬 iMessage</span>
-                <span className="text-[9px] text-on-surface-variant truncate">“Fine.” (34m delay)</span>
-              </button>
-              <button
-                onClick={() => handleSelectPreset('whatsapp')}
-                disabled={analyzing}
-                className="px-2 py-2 rounded-lg bg-surface-container-low hover:bg-secondary-container border border-black/20 text-left transition-colors flex flex-col gap-0.5 cursor-pointer"
-              >
-                <span className="text-[11px] font-bold uppercase truncate">🟢 WhatsApp</span>
-                <span className="text-[9px] text-on-surface-variant truncate">Unread 3h (“K.”)</span>
-              </button>
-              <button
-                onClick={() => handleSelectPreset('instagram')}
-                disabled={analyzing}
-                className="px-2 py-2 rounded-lg bg-surface-container-low hover:bg-secondary-container border border-black/20 text-left transition-colors flex flex-col gap-0.5 cursor-pointer"
-              >
-                <span className="text-[11px] font-bold uppercase truncate">📸 Instagram</span>
-                <span className="text-[9px] text-on-surface-variant truncate">Liked message tap</span>
-              </button>
-            </div>
-          </div>
 
           {/* Optional Transcript Input Box */}
           {isTextMode && (
@@ -975,6 +691,15 @@ export const ReceiptsScreen: React.FC<ReceiptsScreenProps> = ({
               <span className="material-symbols-outlined text-[14px]">bolt</span> Ready
             </span>
           </div>
+
+          {caseData.nodes.length === 0 && (
+            <div className="p-8 text-center flex flex-col items-center gap-2 border border-dashed border-black/15 rounded-xl bg-surface-container-lowest">
+              <span className="material-symbols-outlined text-[28px] text-on-surface-variant">receipt_long</span>
+              <span className="font-body-sm text-body-sm text-on-surface-variant">
+                Upload a screenshot or paste a transcript to reconstruct the conversation.
+              </span>
+            </div>
+          )}
 
           {/* Dynamically Rendered Chat Nodes */}
           {caseData.nodes.map((node, index) => {
