@@ -1,0 +1,57 @@
+services:
+  - type: web
+    name: debate-and-win-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /health
+    envVars:
+      - key: ENV
+        value: production
+      - key: SECRET_KEY
+        sync: false
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: JWT_EXPIRE_MINUTES
+        value: "10080"
+      - key: CORS_ORIGINS
+        sync: false
+
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: ANTHROPIC_MODEL
+        value: claude-sonnet-4-6
+      - key: ANTHROPIC_MAX_TOKENS
+        value: "1500"
+
+      - key: DB_BACKEND
+        value: supabase
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+
+      - key: CREDITS_FORENSIC_ANALYSIS
+        value: "3"
+      - key: CREDITS_FUMBLE_ANALYSIS
+        value: "1"
+      - key: CREDITS_SPARRING_TURN
+        value: "1"
+      - key: CREDITS_NEW_USER_BONUS
+        value: "20"
+
+      - key: RATE_LIMIT_PER_MINUTE
+        value: "30"
+      - key: RATE_LIMIT_AI_PER_MINUTE
+        value: "10"
+
+      - key: STORAGE_BUCKET
+        value: receipts
+      - key: MAX_UPLOAD_MB
+        value: "10"
+
+      - key: ZERO_LOG_RETENTION
+        value: "true"
