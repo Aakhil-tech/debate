@@ -2,6 +2,7 @@
 from fastapi import APIRouter, Depends
 
 from app.auth import get_current_user
+from app.config import settings
 from app.db import repo
 from app.models.schemas import WarRoomStats, ActiveCase, CaseSummary
 
@@ -50,6 +51,7 @@ async def get_stats(current_user: dict = Depends(get_current_user)):
         fumble_flags=current_user["fumble_flags"],
         meltdowns=current_user["meltdowns"],
         credits=current_user["credits"],
+        credits_unlimited=settings.CREDITS_UNLIMITED,
         recent_cases=recent_cases,
         active_target_audit=active_audit,
         recommended_move=RECOMMENDED_MOVES[move_idx],

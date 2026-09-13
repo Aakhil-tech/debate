@@ -147,6 +147,7 @@ class WarRoomStats(BaseModel):
     fumble_flags: int
     meltdowns: int
     credits: int
+    credits_unlimited: bool = False
     recent_cases: List[CaseSummary] = []
     active_target_audit: Optional[dict] = None
     recommended_move: str

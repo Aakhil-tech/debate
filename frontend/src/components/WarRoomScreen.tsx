@@ -252,7 +252,7 @@ export const WarRoomScreen: React.FC<WarRoomScreenProps> = ({
             <span className="font-label-md text-label-md uppercase font-bold">🎯 Suggested Reply</span>
           </div>
           <span className="px-2.5 py-1 rounded-full bg-secondary-container text-on-secondary-fixed font-label-sm text-label-sm uppercase font-bold border border-black/10">
-            {stats.credits} Credits Left
+            {stats.creditsUnlimited ? '∞ Unlimited' : `${stats.credits} Credits Left`}
           </span>
         </div>
         <div className="p-4 bg-surface-container-low rounded-xl border border-black/10 min-h-[64px] flex items-center">

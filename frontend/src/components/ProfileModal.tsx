@@ -51,7 +51,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, sho
               LVL {stats.level} TACTICIAN
             </span>
             <span className="font-body-sm text-xs text-on-secondary-fixed-variant mt-0.5">
-              Credits remaining: {stats.credits}
+              Credits remaining: {stats.creditsUnlimited ? '∞ Unlimited' : stats.credits}
             </span>
           </div>
         </div>

@@ -403,6 +403,7 @@ export interface TacticianStats {
   handle: string;
   level: number;
   credits: number;
+  creditsUnlimited: boolean;
   recommendedMove: string | null;
   activeTargetAudit: { case_id: string; title: string; subtextScore: number; frameLossPct: number } | null;
 }
@@ -418,6 +419,7 @@ const DEFAULT_STATS: TacticianStats = {
   handle: "@tactician",
   level: 1,
   credits: 0,
+  creditsUnlimited: false,
   recommendedMove: null,
   activeTargetAudit: null,
 };
@@ -456,6 +458,7 @@ interface BackendWarRoomStats {
   fumble_flags: number;
   meltdowns: number;
   credits: number;
+  credits_unlimited: boolean;
   recommended_move: string;
   active_target_audit: { case_id: string; title: string; subtext_score: number; frame_loss_pct: number } | null;
 }
@@ -477,6 +480,7 @@ export async function refreshStoredStats(): Promise<TacticianStats | null> {
       handle: `@${data.handle}`,
       level: data.level,
       credits: data.credits,
+      creditsUnlimited: data.credits_unlimited,
       recommendedMove: data.recommended_move,
       activeTargetAudit: data.active_target_audit
         ? {
