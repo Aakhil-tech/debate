@@ -30,6 +30,44 @@ async def _call(system: str, messages: list[dict], max_tokens: int = None, model
     return response.choices[0].message.content
 
 
+def _repair_truncated_json(text: str) -> dict | None:
+    """Best-effort recovery when the model hit max_tokens mid-object: walk
+    backwards to the last balanced `}`/`]` boundary, close any remaining
+    open braces/brackets, and try to parse that. Returns a partial-but-valid
+    result (e.g. fewer nodes than intended) instead of nothing at all."""
+    boundaries = [i for i, ch in enumerate(text) if ch in "}]"]
+    for idx in reversed(boundaries):
+        prefix = text[: idx + 1]
+        stack: list[str] = []
+        in_string = False
+        escape = False
+        for ch in prefix:
+            if escape:
+                escape = False
+                continue
+            if ch == "\\":
+                escape = True
+                continue
+            if ch == '"':
+                in_string = not in_string
+                continue
+            if in_string:
+                continue
+            if ch in "{[":
+                stack.append(ch)
+            elif ch in "}]":
+                if stack:
+                    stack.pop()
+        if in_string:
+            continue
+        closer = "".join("}" if c == "{" else "]" for c in reversed(stack))
+        try:
+            return json.loads(prefix + closer)
+        except json.JSONDecodeError:
+            continue
+    return None
+
+
 def _parse_json(text: str) -> dict:
     try:
         return json.loads(text)
@@ -47,6 +85,9 @@ def _parse_json(text: str) -> dict:
             return json.loads(match.group(0))
         except json.JSONDecodeError:
             pass
+    repaired = _repair_truncated_json(text)
+    if repaired is not None:
+        return repaired
     raise ValueError(f"Could not parse JSON from model output: {text[:300]}")
 
 
@@ -98,7 +139,14 @@ async def analyze_receipts(text_content: str, image_base64: str | None = None) -
     if image_base64:
         user_content.append({
             "type": "text",
-            "text": "Perform a full forensic analysis of this conversation screenshot.",
+            "text": (
+                "Perform a forensic analysis of this conversation screenshot. "
+                "Output budget is tight: include at most 6 of the most tactically "
+                "significant messages as nodes (prioritise the target/locked message "
+                "and any unforced errors), and keep every text/summary field short "
+                "(under 15 words). Completing the full JSON schema matters more than "
+                "including every message."
+            ),
         })
         user_content.append({
             "type": "image_url",
@@ -115,7 +163,17 @@ async def analyze_receipts(text_content: str, image_base64: str | None = None) -
     raw = await _call(
         FORENSIC_SYSTEM, [{"role": "user", "content": user_content}], max_tokens=max_tokens, model=model
     )
-    return _parse_json(raw)
+    result = _parse_json(raw)
+    result.setdefault("nodes", [])
+    result.setdefault("title", "Untitled Case")
+    result.setdefault("nodeCount", len(result["nodes"]))
+    result.setdefault("subtextScore", 0)
+    result.setdefault("frameLossPct", 0)
+    result.setdefault("egoDeficitPct", 0)
+    result.setdefault("tacticalMove", "")
+    result.setdefault("forensicSummary", "")
+    result.setdefault("tacticalRetorts", [])
+    return result
 
 
 FUMBLE_SYSTEM = """You are the Fumble Detector — a harsh but constructive tactical advisor preventing frame collapse. Your job: catch messages before they detonate.

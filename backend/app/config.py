@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     GROQ_MODEL: str = "openai/gpt-oss-120b"
     GROQ_VISION_MODEL: str = "qwen/qwen3.8-27b"
     GROQ_MAX_TOKENS: int = 1500
-    GROQ_VISION_MAX_TOKENS: int = 600
+    GROQ_VISION_MAX_TOKENS: int = 900
 
     CREDITS_FORENSIC_ANALYSIS: int = 3
     CREDITS_FUMBLE_ANALYSIS: int = 1

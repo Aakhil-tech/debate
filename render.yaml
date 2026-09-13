@@ -27,7 +27,7 @@ services:
       - key: GROQ_MAX_TOKENS
         value: "1500"
       - key: GROQ_VISION_MAX_TOKENS
-        value: "600"
+        value: "900"
 
       - key: DB_BACKEND
         value: supabase
