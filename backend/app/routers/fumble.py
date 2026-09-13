@@ -36,6 +36,7 @@ async def analyze_draft(
         draft_length=len(body.draft),
         draft_text=None if settings.ZERO_LOG_RETENTION else body.draft,
     )
+    await repo().increment_stat(current_user["id"], "fumble_flags")
 
     return FumbleResult(
         analysis_id=analysis_id,

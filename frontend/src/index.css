@@ -1,21 +1,176 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-html,
-body {
-  width: 100vw;
-  margin: 0;
-  padding: 0;
-  background-color: #f9f9f9;
+@theme {
+  --font-space: 'Space Grotesk', sans-serif;
+  --font-inter: 'Inter', sans-serif;
+
+  --color-surface: #f9f9f9;
+  --color-surface-dim: #dadada;
+  --color-surface-bright: #f9f9f9;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f3f3f4;
+  --color-surface-container: #eeeeee;
+  --color-surface-container-high: #e8e8e8;
+  --color-surface-container-highest: #e2e2e2;
+  --color-on-surface: #1a1c1c;
+  --color-on-surface-variant: #4c4546;
+  --color-inverse-surface: #2f3131;
+  --color-inverse-on-surface: #f0f1f1;
+  --color-outline: #7e7576;
+  --color-outline-variant: #cfc4c5;
+  --color-surface-tint: #5e5e5e;
+  --color-primary: #000000;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #1b1b1b;
+  --color-on-primary-container: #848484;
+  --color-inverse-primary: #c6c6c6;
+  --color-secondary: #6b5f00;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #fbe44f;
+  --color-on-secondary-container: #726500;
+  --color-tertiary: #000000;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #340043;
+  --color-on-tertiary-container: #b85fd0;
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+  --color-primary-fixed: #e2e2e2;
+  --color-primary-fixed-dim: #c6c6c6;
+  --color-on-primary-fixed: #1b1b1b;
+  --color-on-primary-fixed-variant: #474747;
+  --color-secondary-fixed: #fbe44f;
+  --color-secondary-fixed-dim: #ddc734;
+  --color-on-secondary-fixed: #201c00;
+  --color-on-secondary-fixed-variant: #504700;
+  --color-tertiary-fixed: #fcd7ff;
+  --color-tertiary-fixed-dim: #f2afff;
+  --color-on-tertiary-fixed: #340043;
+  --color-on-tertiary-fixed-variant: #73198c;
+  --color-background: #f9f9f9;
+  --color-on-background: #1a1c1c;
+  --color-surface-variant: #e2e2e2;
 }
-body {
-  overscroll-behavior: none;
-  font-family: "Inter", sans-serif;
+
+@layer base {
+  body {
+    overscroll-behavior: none;
+    font-family: 'Inter', sans-serif;
+    background-color: #f9f9f9;
+    color: #1a1c1c;
+  }
 }
-.pb-safe {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+
+/* Custom Neo-Brutalist utility classes matching the HTML design */
+.font-headline-lg {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 22px;
+  line-height: 28px;
+  letter-spacing: -0.02em;
+  font-weight: 700;
 }
-.pt-safe {
-  padding-top: env(safe-area-inset-top, 0px);
+
+.font-headline-md {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 18px;
+  line-height: 24px;
+  letter-spacing: -0.01em;
+  font-weight: 700;
+}
+
+.font-display-lg {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 36px;
+  line-height: 40px;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+}
+
+.font-display-lg-mobile {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 26px;
+  line-height: 30px;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+
+.font-label-lg {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  line-height: 18px;
+  letter-spacing: 0.02em;
+  font-weight: 700;
+}
+
+.font-label-md {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+}
+
+.font-label-sm {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 10px;
+  line-height: 14px;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+}
+
+.font-body-lg {
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: -0.01em;
+  font-weight: 400;
+}
+
+.font-body-md {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+}
+
+.font-body-sm {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: inline-flex;
+  animation: marquee 16s linear infinite;
+}
+
+::-webkit-scrollbar {
+  display: none;
 }

@@ -1,4 +1,7 @@
 
+import secrets
+import uuid
+
 from fastapi import APIRouter, HTTPException, Depends
 
 from app.db import repo
@@ -12,6 +15,18 @@ from app.models.schemas import (
 )
 
 router = APIRouter()
+
+
+@router.post("/guest", response_model=TokenResponse, summary="Create an anonymous guest session")
+async def guest():
+    suffix = uuid.uuid4().hex[:10]
+    email = f"guest-{suffix}@debateandwin.local"
+    password = secrets.token_urlsafe(16)
+    handle = f"guest_{suffix[:6]}"
+
+    user = await repo().register_user(email, password, handle)
+    token = create_access_token(user["id"], email)
+    return TokenResponse(access_token=token, user=UserProfile(**user))
 
 
 @router.post("/register", response_model=TokenResponse, summary="Register new user")
