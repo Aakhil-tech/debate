@@ -66,11 +66,11 @@ class SupabaseRepository(Repository):
 
     async def get_user(self, user_id: str) -> Optional[dict]:
         res = _client().table("users").select("*").eq("id", user_id).maybe_single().execute()
-        return res.data
+        return res.data if res else None
 
     async def get_user_by_email(self, email: str) -> Optional[dict]:
         res = _client().table("users").select("*").eq("email", email).maybe_single().execute()
-        return res.data
+        return res.data if res else None
 
 
     async def deduct_credits(self, user_id: str, amount: int) -> int:
@@ -139,7 +139,7 @@ class SupabaseRepository(Repository):
             .maybe_single()
             .execute()
         )
-        return res.data
+        return res.data if res else None
 
     async def get_recent_cases(self, user_id: str, limit: int) -> list[dict]:
         res = (
@@ -242,7 +242,7 @@ class SupabaseRepository(Repository):
             .maybe_single()
             .execute()
         )
-        if not res.data:
+        if not res or not res.data:
             raise LookupError("Session not found")
         return res.data
 
